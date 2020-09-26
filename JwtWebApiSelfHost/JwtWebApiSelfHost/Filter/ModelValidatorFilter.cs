@@ -15,13 +15,17 @@ namespace JwtWebApiSelfHost.Filter
     /// </summary>
     public class ModelValidatorFilter : ActionFilterAttribute
     {
+        /// <summary>
+        /// Get model validation result and response to client
+        /// </summary>
+        /// <param name="actionContext"></param>
         public override void OnActionExecuting(HttpActionContext actionContext)
         {
             if (actionContext.ModelState.IsValid)
             {
                 base.OnActionExecuting(actionContext);
             }
-            else
+            else  //Handle invalid model
             {
                 var exceptions = new List<Exception>();
                 foreach (var state in actionContext.ModelState)
@@ -40,6 +44,7 @@ namespace JwtWebApiSelfHost.Filter
                         exceptionMessages.Append($"Number of total exception:{exceptions.Count()}. Exception messages:[{exceptionMessageIndex++}]{e.Message}");
                     });
 
+                    //Assign response
                     actionContext.Response = actionContext.Request.CreateResponse(
                     HttpStatusCode.BadRequest, new Utility.ResponseResult.ResultMessage()
                     {

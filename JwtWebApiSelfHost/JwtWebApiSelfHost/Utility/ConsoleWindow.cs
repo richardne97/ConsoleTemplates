@@ -9,6 +9,9 @@ namespace JwtWebApiSelfHost.Utility
 {
     #region Disable ControlBox
 
+    /// <summary>
+    /// Console window 
+    /// </summary>
     public class ConsoleWindow
     {
         private const int MF_BYCOMMAND = 0x00000000;

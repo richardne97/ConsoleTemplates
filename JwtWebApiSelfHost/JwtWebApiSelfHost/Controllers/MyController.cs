@@ -11,7 +11,7 @@ namespace JwtWebApiSelfHost.Controllers
 {
     [Authorize]
     [RoutePrefix("My")]
-    public class MyController
+    public class MyController : ApiController
     {
         /// <summary>
         /// MyGetAction
@@ -19,9 +19,10 @@ namespace JwtWebApiSelfHost.Controllers
         /// <param name="message">Request message in get parameter</param>
         /// <returns></returns>
         [HttpGet]
+        [Route("")]
         public string MyGetAction([FromUri] string message)
         {
-            return message;
+            return $"{User.Identity.Name}, I got your message. '{message}'";
         }
 
         /// <summary>
@@ -30,6 +31,7 @@ namespace JwtWebApiSelfHost.Controllers
         /// <param name="requestModel">model in post body (JSON format)</param>
         /// <returns></returns>
         [HttpPost]
+        [Route("")]
         public ResponseModel MyPostAction([FromBody]RequestModel requestModel)
         {
             return new ResponseModel()

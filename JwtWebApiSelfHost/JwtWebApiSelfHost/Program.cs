@@ -12,7 +12,6 @@ namespace JwtWebApiSelfHost
 {
     class Program
     {
-        static int _listenPort = 800;
         static bool _captureGlobalUnhandledExceptionAndRestartProgram = false;
 
         static void Main(string[] args)
@@ -34,7 +33,7 @@ namespace JwtWebApiSelfHost
             Utility.ConsoleWindow.DisableCloseButton();
 
             //Start self-host Web API
-            string _listenUri = $"http://+:{_listenPort}/";
+            string _listenUri = $"http://+:{Properties.Settings.Default.ListenPort}/";
             HttpServerConfig hsc = new HttpServerConfig(_listenUri);
 
             if (hsc.IsEnable)
@@ -76,6 +75,7 @@ namespace JwtWebApiSelfHost
 
             #region Dispose resouces
 
+            //Add dispose resouce here before leave
 
             #endregion
         }

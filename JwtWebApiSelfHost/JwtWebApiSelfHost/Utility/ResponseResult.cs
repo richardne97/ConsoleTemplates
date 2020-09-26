@@ -22,8 +22,15 @@ namespace JwtWebApiSelfHost.Utility
         /// Message templete for most api results.
         /// </summary>
         public struct ResultMessage
-        {
+        { 
+            /// <summary>
+            /// Response reulst object
+            /// </summary>
             public object Result { get; set; }
+
+            /// <summary>
+            /// Details about the response
+            /// </summary>
             public string Details { get; set; }
         }
 
@@ -70,9 +77,18 @@ namespace JwtWebApiSelfHost.Utility
     /// </summary>
     public class JsonContent : StringContent
     {
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="content">the content to be encoded in JSON format. The encoding is UTF8</param>
         public JsonContent(string content) : this(content, Encoding.UTF8)
         {   }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="content">the content to be encoded in JSON format.</param>
+        /// <param name="encoding">The encoding type</param>
         public JsonContent(string content, Encoding encoding) : base(content, encoding, "application/json")
         {   }
     }

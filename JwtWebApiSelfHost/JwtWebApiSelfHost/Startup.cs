@@ -14,11 +14,16 @@ using System.Web.Http;
 
 namespace JwtWebApiSelfHost
 {
+    /// <summary>
+    /// The Startup class is specified as a type parameter in the WebApp.Start method.
+    /// </summary>
     public class Startup
     {
-        // This code configures Web API. The Startup class is specified as a type
-        // parameter in the WebApp.Start method.
-        public void Configuration(IAppBuilder appBuilder)
+        /// <summary>
+        /// This code configures Web API. The Startup class is specified as a type parameter in the WebApp.Start method.
+        /// </summary>
+        /// <param name="app">Application Builder</param>
+        public void Configuration(IAppBuilder app)
         {
             // Configure Web API for self-host. 
             HttpConfiguration config = new HttpConfiguration();
@@ -26,23 +31,22 @@ namespace JwtWebApiSelfHost
             // Configure Swagger help page
             config.EnableSwagger(c =>
             {
-                c.SingleApiVersion("v1", "My API").License(lc => lc.Name("My Company").Url("http://www.anasystem.com.tw"));
-                c.IncludeXmlComments($"{AppContext.BaseDirectory}{Assembly.GetExecutingAssembly().GetName()}.xml");
+                c.SingleApiVersion("v1", "My API").License(lc => lc.Name("My Company").Url("https://github.com/richardne97/"));
+                c.IncludeXmlComments($"{AppContext.BaseDirectory}{Assembly.GetExecutingAssembly().GetName().Name}.xml");
                 c.DescribeAllEnumsAsStrings();
+                c.ApiKey("Authorization").Description("OAuth2 JWT for accessing secure APIs").Name("Authorization").In("header");
             })
             .EnableSwaggerUi(u =>
             {
                 u.DocumentTitle("My API");
+                u.EnableApiKeySupport("Authorization", "header");
             });
 
+            //Enable JWT Authentication
             config.SuppressDefaultHostAuthentication();
             config.Filters.Add(new HostAuthenticationFilter(OAuthDefaults.AuthenticationType));
             
-            config.MapHttpAttributeRoutes();
-            config.Filters.Add(new Filter.ModelValidatorFilter());
-            appBuilder.UseWebApi(config);
-
-            appBuilder.UseJwtBearerAuthentication(new JwtBearerAuthenticationOptions
+            app.UseJwtBearerAuthentication(new JwtBearerAuthenticationOptions
             {
                 AuthenticationMode = AuthenticationMode.Active,
                 TokenValidationParameters = new TokenValidationParameters()
@@ -50,11 +54,19 @@ namespace JwtWebApiSelfHost
                     ValidateIssuer = true,
                     ValidateAudience = true,
                     ValidateIssuerSigningKey = true,
-                    ValidIssuer = "http://my.com",   
-                    ValidAudience = "http://my.com",
-                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("my_secret_key"))
+                    ValidIssuer = Properties.Settings.Default.JwtIssuer,   
+                    ValidAudience = Properties.Settings.Default.JwtAudidence,
+                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Properties.Settings.Default.JwtSecurityKey))
                 }
             });
+
+            //Enable Attribute Route
+            config.MapHttpAttributeRoutes();
+
+            //Validating model format while receving request.
+            config.Filters.Add(new Filter.ModelValidatorFilter());
+
+            app.UseWebApi(config);
         }
     }
 }

@@ -1,0 +1,18 @@
+﻿<?xml version='1.0' encoding='utf-8'?>
+<SettingsFile xmlns="http://schemas.microsoft.com/VisualStudio/2004/01/settings" CurrentProfile="(Default)" GeneratedClassNamespace="JwtWebApiSelfHost.Properties" GeneratedClassName="Settings">
+  <Profiles />
+  <Settings>
+    <Setting Name="JwtIssuer" Type="System.String" Scope="User">
+      <Value Profile="(Default)">Richad.idv</Value>
+    </Setting>
+    <Setting Name="JwtAudidence" Type="System.String" Scope="User">
+      <Value Profile="(Default)">Cathy.idv</Value>
+    </Setting>
+    <Setting Name="JwtSecurityKey" Type="System.String" Scope="User">
+      <Value Profile="(Default)">AkAC2tXXy4nctdJ4KvgSnLOLD38s2YSm</Value>
+    </Setting>
+    <Setting Name="ListenPort" Type="System.Int32" Scope="User">
+      <Value Profile="(Default)">800</Value>
+    </Setting>
+  </Settings>
+</SettingsFile>
