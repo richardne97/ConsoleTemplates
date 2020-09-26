@@ -13,6 +13,13 @@ namespace JwtWebApiSelfHost.Controllers
     [RoutePrefix("My")]
     public class MyController : ApiController
     {
+        private object _injectObject;
+
+        public MyController(object injectObject)
+        {
+            _injectObject = injectObject;
+        }
+
         /// <summary>
         /// MyGetAction
         /// </summary>

@@ -1,4 +1,6 @@
-﻿using Microsoft.IdentityModel.Tokens;
+﻿using JwtWebApiSelfHost.Injections;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.IdentityModel.Tokens;
 using Microsoft.Owin.Security;
 using Microsoft.Owin.Security.Jwt;
 using Microsoft.Owin.Security.OAuth;
@@ -11,6 +13,8 @@ using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using System.Web.Http;
+using System.Web.Http.Controllers;
+using System.Web.Mvc;
 
 namespace JwtWebApiSelfHost
 {
@@ -65,6 +69,26 @@ namespace JwtWebApiSelfHost
 
             //Validating model format while receving request.
             config.Filters.Add(new Filter.ModelValidatorFilter());
+
+            //Injection settings
+            var services = new ServiceCollection();
+
+            //Injection setting for controllers. 
+            services.AddControllersAsServices(typeof(Startup).Assembly.GetExportedTypes()
+                    .Where(t => !t.IsAbstract && !t.IsGenericTypeDefinition)
+                    .Where(t => typeof(IController).IsAssignableFrom(t)
+                    || typeof(IHttpController).IsAssignableFrom(t)));
+
+            object injectObject = Guid.NewGuid();
+            services.AddSingleton(typeof(object), injectObject);
+
+            var resolver = new DefaultDependencyResolver(services.BuildServiceProvider());
+
+            //For MVC
+            DependencyResolver.SetResolver(resolver);
+
+            //For Web API
+            config.DependencyResolver = resolver; //For Web API
 
             app.UseWebApi(config);
         }
