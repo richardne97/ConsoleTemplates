@@ -111,7 +111,7 @@ namespace JwtWebApiSelfHost.Utility
                     sb.Append(ps.StandardOutput.ReadToEnd());
                 ps.WaitForExit();
 
-                if (sb.ToString().Contains("Listen: Yes"))
+                if (sb.ToString().Contains("Listen: Yes") || sb.ToString().Contains("接聽: Yes"))
                     return true;
                 else
                     return false;
