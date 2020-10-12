@@ -39,6 +39,13 @@ namespace JwtWebApiSelfHost
                 c.IncludeXmlComments($"{AppContext.BaseDirectory}{Assembly.GetExecutingAssembly().GetName().Name}.xml");
                 c.DescribeAllEnumsAsStrings();
                 c.ApiKey("Authorization").Description("OAuth2 JWT for accessing secure APIs").Name("Authorization").In("header");
+                c.RootUrl(r => 
+                {
+                    if (!string.IsNullOrEmpty(Properties.Settings.Default.ExternalUriRoot))
+                        return Properties.Settings.Default.ExternalUriRoot;
+                    else
+                        return r.RequestUri.ToString().Replace(r.RequestUri.LocalPath,"");
+                });
             })
             .EnableSwaggerUi(u =>
             {
