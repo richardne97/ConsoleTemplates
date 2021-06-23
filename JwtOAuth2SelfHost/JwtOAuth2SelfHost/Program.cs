@@ -1,4 +1,4 @@
-﻿using JwtWebApiSelfHost.Utility;
+﻿using SR15.GISPlatform.Utility;
 using Microsoft.Owin.Hosting;
 using System;
 using System.Collections.Generic;
@@ -7,15 +7,16 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
-using System.IO;
 
-namespace JwtWebApiSelfHost
+namespace JwtOAuth2SelfHost
 {
     class Program
     {
+        static bool _captureGlobalUnhandledExceptionAndRestartProgram = false;
+
         static void Main(string[] args)
         {
-            if (Properties.Settings.Default.UnhandledExceptionReboot)
+            if (_captureGlobalUnhandledExceptionAndRestartProgram)
                 AppDomain.CurrentDomain.UnhandledException += CurrentDomain_UnhandledException;
 
             #region Redirect Trace messages to NLogTraceListen
@@ -25,61 +26,59 @@ namespace JwtWebApiSelfHost
             #endregion
 
             //Display Program name and version while starts
-            //顯示軟體版本
             AssemblyName assemblyName = Assembly.GetExecutingAssembly().GetName();
             Trace.WriteLine($"{assemblyName.Name} {assemblyName.Version} Starts");
 
             //Disable close button in control box.
-            //使 Console 視窗關閉功能無法運作
-            ConsoleInteractive.DisableControlBoxCloseButton();
-            //Disable quick edit
-            //使 Console 視窗輸入功能無法運作，避免誤觸導致系統停止運作
-            ConsoleInteractive.DisableQuickEdit();
-            
-            #region Check http listen configuration and start listen 檢查並啟用 Http Web API 伺服器
+            Utility.ConsoleWindow.DisableCloseButton();
 
-            HttpServerConfig hsc = new HttpServerConfig(Properties.Settings.Default.ListenPort);
-            string webListenUrl = $"http://+:{Properties.Settings.Default.ListenPort}/";
-            bool isHttpSysEnabled = hsc.IsEnable;
-            
-            if (!isHttpSysEnabled)
+            //Start self-host Web API
+            string _listenUri = $"http://+:{Properties.Settings.Default.ListenPort}/";
+            HttpServerConfig hsc = new HttpServerConfig(_listenUri);
+
+            if (hsc.IsEnable)
+            {
+                Trace.WriteLine($"Start selfhost web api. {_listenUri}");
+                WebApp.Start<Startup>(_listenUri);
+            }
+            else
             {
                 if (hsc.AddUrlAcl())
                 {
-                    Trace.WriteLine($"Add new urlacl {webListenUrl} successfuly");
-                    isHttpSysEnabled = true;
+                    Trace.WriteLine($"Add new urlacl {_listenUri} successfuly");
+                    WebApp.Start<Startup>(_listenUri);
                 }
                 else
                     throw new Exception("Http listen can not be started.");
             }
 
-            if (isHttpSysEnabled)
-            {
-                WebApp.Start<Startup>(webListenUrl);
-                Trace.WriteLine($"Listen {webListenUrl}");
-            }
-
-            #endregion
-
             //Accept user console input and response
-            string cmd = string.Empty;
-            string helpContent = File.ReadAllText($"{AppContext.BaseDirectory}helpContent.txt");
-            
+            List<char> commandInputBuufer = new List<char>();
             while (true)
             {
-                Console.Write("\r\n>");
-                if (string.IsNullOrEmpty(cmd))
-                    Console.Write(helpContent);
-                else if (cmd == "quit")
-                    break;
-                else
-                    CommandHandler(cmd);
+                if (Console.KeyAvailable)
+                {
+                    ConsoleKeyInfo cunKey = Console.ReadKey();
+                    if (cunKey.Key == ConsoleKey.Enter)
+                    {
+                        string cmd = new string(commandInputBuufer.ToArray());
+                        commandInputBuufer.Clear();
+                        if (cmd == "q")
+                        {
+                            Console.WriteLine("Terminating...");
+                            break;
+                        }
+                        else
+                            CommandHandler(cmd);
+                    }
+                    else
+                        commandInputBuufer.Add(cunKey.KeyChar);
+                }
             }
 
-            #region Dispose resouces before leave
+            #region Dispose resouces
 
-
-
+            //Add dispose resouce here before leave
 
             #endregion
         }
@@ -95,6 +94,10 @@ namespace JwtWebApiSelfHost
 
                     case "Commmand2":
                         break;
+
+                    default:
+                        Console.WriteLine("Enter 'q' to exit");
+                        break;
                 }
             }
         }
@@ -106,7 +109,6 @@ namespace JwtWebApiSelfHost
         /// <param name="e"></param>
         static void CurrentDomain_UnhandledException(object sender, UnhandledExceptionEventArgs e)
         {
-            //Write unhandle exception message to Fatal log
             StringBuilder sb = new StringBuilder();
             sb.Append("UnhandledException");
             if (e.ExceptionObject != null)
@@ -118,13 +120,14 @@ namespace JwtWebApiSelfHost
             Trace.Write(sb.ToString(), "Fatal");
 
             //Restart program
-            using (Process newProcess = new Process())
+            Process newProcess = new Process()
             {
-                newProcess.StartInfo = new ProcessStartInfo(Assembly.GetExecutingAssembly().Location);
-                newProcess.Start();
-                //Give code 1, to prevent Windows OS shows "Program stop working" message window and ask user to response.
-                Environment.Exit(1);
+                StartInfo = new ProcessStartInfo(Assembly.GetExecutingAssembly().Location)
             };
+            newProcess.Start();
+
+            //Give code 1, to prevent Windows OS shows "Program stop working" message window and ask user to response.
+            Environment.Exit(1);
         }
     }
 }

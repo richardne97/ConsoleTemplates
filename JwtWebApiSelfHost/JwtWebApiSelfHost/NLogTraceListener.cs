@@ -24,14 +24,22 @@ namespace JwtWebApiSelfHost
             _enableConsoleOutput = enableConsoleOutput;
         }
 
+        /// <summary>
+        /// Write message
+        /// </summary>
+        /// <param name="message"></param>
         public override void Write(string message)
         {
             string writeMsg = $"{GetCaller()}:\r\n{message}";
             _logger.Trace(writeMsg);
             if (_enableConsoleOutput)
-                System.Console.WriteLine($"\r\n{DateTime.Now.ToString("yyyy-MM-ddTHH:mm:ss")} {writeMsg}");
+                System.Console.WriteLine($"\r\n{DateTime.Now:yyyy-MM-ddTHH:mm:ss} {writeMsg}");
         }
 
+        /// <summary>
+        /// Write message
+        /// </summary>
+        /// <param name="message"></param>
         public override void WriteLine(string message)
         {
             string writeMsg = $"{GetCaller()}:\r\n{message}";
@@ -40,6 +48,11 @@ namespace JwtWebApiSelfHost
                 System.Console.WriteLine($"\r\n{DateTime.Now:yyyy-MM-ddTHH:mm:ss} {writeMsg}");
         }
 
+        /// <summary>
+        /// Write message
+        /// </summary>
+        /// <param name="message"></param>
+        /// <param name="category"></param>
         public override void Write(string message, string category)
         {
             string writeMsg = $"{GetCaller()}:\r\n{message}";
@@ -48,6 +61,11 @@ namespace JwtWebApiSelfHost
             WriteToNLog(writeMsg, category);
         }
 
+        /// <summary>
+        /// Write message
+        /// </summary>
+        /// <param name="message"></param>
+        /// <param name="category"></param>
         public override void WriteLine(string message, string category)
         {
             string writeMsg = $"{GetCaller()}:\r\n{message}";

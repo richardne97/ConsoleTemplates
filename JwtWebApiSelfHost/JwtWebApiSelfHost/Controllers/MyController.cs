@@ -9,12 +9,19 @@ using Microsoft.Owin.Security.Provider;
 
 namespace JwtWebApiSelfHost.Controllers
 {
+    /// <summary>
+    /// Controllers
+    /// </summary>
     [Authorize]
     [RoutePrefix("My")]
     public class MyController : ApiController
     {
         private object _injectObject;
 
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        /// <param name="injectObject"></param>
         public MyController(object injectObject)
         {
             _injectObject = injectObject;

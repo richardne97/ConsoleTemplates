@@ -61,7 +61,7 @@ namespace JwtWebApiSelfHost.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("800")]
+        [global::System.Configuration.DefaultSettingValueAttribute("801")]
         public int ListenPort {
             get {
                 return ((int)(this["ListenPort"]));
@@ -80,6 +80,30 @@ namespace JwtWebApiSelfHost.Properties {
             }
             set {
                 this["ExternalUriRoot"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool EnableExternalUriRoot {
+            get {
+                return ((bool)(this["EnableExternalUriRoot"]));
+            }
+            set {
+                this["EnableExternalUriRoot"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool UnhandledExceptionReboot {
+            get {
+                return ((bool)(this["UnhandledExceptionReboot"]));
+            }
+            set {
+                this["UnhandledExceptionReboot"] = value;
             }
         }
     }

@@ -19,23 +19,8 @@ namespace JwtWebApiSelfHost.Utility
     public class ResponseResult
     {
         /// <summary>
-        /// Message templete for most api results.
-        /// </summary>
-        public struct ResultMessage
-        { 
-            /// <summary>
-            /// Response reulst object
-            /// </summary>
-            public object Result { get; set; }
-
-            /// <summary>
-            /// Details about the response
-            /// </summary>
-            public string Details { get; set; }
-        }
-
-        /// <summary>
         /// Generate response message while the return value is a single, primitive value
+        /// 回應數值型態
         /// </summary>
         /// <param name="code"></param>
         /// <param name="value"></param>
@@ -55,7 +40,7 @@ namespace JwtWebApiSelfHost.Utility
         }
 
         /// <summary>
-        /// 參數不合法
+        /// 回應參數不合法
         /// </summary>
         public static HttpResponseMessage InvalidParameters(string details)
         {

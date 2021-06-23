@@ -12,10 +12,16 @@
       <Value Profile="(Default)">AkAC2tXXy4nctdJ4KvgSnLOLD38s2YSm</Value>
     </Setting>
     <Setting Name="ListenPort" Type="System.Int32" Scope="User">
-      <Value Profile="(Default)">800</Value>
+      <Value Profile="(Default)">801</Value>
     </Setting>
     <Setting Name="ExternalUriRoot" Type="System.String" Scope="User">
       <Value Profile="(Default)" />
+    </Setting>
+    <Setting Name="EnableExternalUriRoot" Type="System.Boolean" Scope="User">
+      <Value Profile="(Default)">False</Value>
+    </Setting>
+    <Setting Name="UnhandledExceptionReboot" Type="System.Boolean" Scope="User">
+      <Value Profile="(Default)">False</Value>
     </Setting>
   </Settings>
 </SettingsFile>

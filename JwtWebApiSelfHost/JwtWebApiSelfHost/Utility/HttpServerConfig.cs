@@ -14,22 +14,23 @@ namespace JwtWebApiSelfHost.Utility
     /// </summary>
     public class HttpServerConfig
     {
-        private string _listenUri = string.Empty;
+        private readonly int _listenPort = 0;
 
         /// <summary>
         /// 
         /// </summary>
-        /// <param name="listenUri">Example: http://+:8000/</param>
-        public HttpServerConfig(string listenUri)
+        /// <param name="listenPort">Example: http://+:8000/</param>
+        public HttpServerConfig(int listenPort)
         {
-            _listenUri = listenUri;
+            _listenPort = listenPort;
         }
 
         /// <summary>
-        /// Add given url listen path in http.sys
+        /// delete url listen path in http.sys
+        /// 刪除 url listen
         /// </summary>
         /// <returns></returns>
-        public bool DeleteUrlAcl(string user = "Everyone")
+        public bool DeleteUrlAcl()
         {
             Process ps = new Process()
             {
@@ -38,13 +39,14 @@ namespace JwtWebApiSelfHost.Utility
                     Verb = "runas",
                     CreateNoWindow = false,
                     FileName = "netsh",
-                    Arguments = $"http delete urlacl url={_listenUri}",
+                    Arguments = $"http delete urlacl url=http://+:{_listenPort}/",
                     RedirectStandardOutput = false,
                     UseShellExecute = true
                 }
             };
             ps.Start();
             ps.WaitForExit();
+            ps.Dispose();
 
             if (IsEnable)
                 return true;
@@ -57,6 +59,7 @@ namespace JwtWebApiSelfHost.Utility
 
         /// <summary>
         /// Add given url listen path in http.sys
+        /// 新增 url listen
         /// </summary>
         /// <returns></returns>
         public bool AddUrlAcl(string user = "Everyone")
@@ -68,13 +71,14 @@ namespace JwtWebApiSelfHost.Utility
                     Verb = "runas",
                     CreateNoWindow = false,
                     FileName = "netsh",
-                    Arguments = $"http add urlacl url={_listenUri} User={user}",
+                    Arguments = $"http add urlacl url=http://+:{_listenPort}/ User={user}",
                     RedirectStandardOutput = false,
                     UseShellExecute = true
                 }
             };
             ps.Start();
             ps.WaitForExit();
+            ps.Dispose();
 
             if (IsEnable)
                 return true;
@@ -86,7 +90,8 @@ namespace JwtWebApiSelfHost.Utility
         }
 
         /// <summary>
-        /// Check if the given Uri has configured in http.sys 
+        /// Check if the given Uri has configured in http.sys
+        /// 檢查 http listen 是否已經啟用
         /// </summary>
         /// <returns></returns>
         public bool IsEnable
@@ -99,7 +104,7 @@ namespace JwtWebApiSelfHost.Utility
                     {
                         CreateNoWindow = true,
                         FileName = "netsh",
-                        Arguments = $"http show urlacl url={_listenUri}",
+                        Arguments = $"http show urlacl url=http://+:{_listenPort}/",
                         RedirectStandardOutput = true,
                         UseShellExecute = false
                     }
@@ -110,6 +115,7 @@ namespace JwtWebApiSelfHost.Utility
                 while (!ps.StandardOutput.EndOfStream)
                     sb.Append(ps.StandardOutput.ReadToEnd());
                 ps.WaitForExit();
+                ps.Dispose();
 
                 if (sb.ToString().Contains("Listen: Yes") || sb.ToString().Contains("接聽: Yes"))
                     return true;

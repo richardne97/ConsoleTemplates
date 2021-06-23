@@ -1,4 +1,4 @@
-﻿using JwtWebApiSelfHost.Injections;
+﻿using SR15.GISPlatform.Injections;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.Owin.Security;
@@ -15,8 +15,9 @@ using System.Threading.Tasks;
 using System.Web.Http;
 using System.Web.Http.Controllers;
 using System.Web.Mvc;
+using SR14.Database;
 
-namespace JwtWebApiSelfHost
+namespace JwtOAuth2SelfHost
 {
     /// <summary>
     /// The Startup class is specified as a type parameter in the WebApp.Start method.
@@ -33,31 +34,30 @@ namespace JwtWebApiSelfHost
             HttpConfiguration config = new HttpConfiguration();
 
             // Configure Swagger help page
-            // 設定 Swagger Help 頁面
             config.EnableSwagger(c =>
             {
-                c.SingleApiVersion("v1", "My API").License(lc => lc.Name("My Company").Url("https://github.com/richardne97/"));
+                c.SingleApiVersion("v1", "雲林縣政府 圖資平台 Web API").License(lc => lc.Name("安研科技").Url("https://www.anasystem.com.tw/"));
                 c.IncludeXmlComments($"{AppContext.BaseDirectory}{Assembly.GetExecutingAssembly().GetName().Name}.xml");
                 c.DescribeAllEnumsAsStrings();
                 c.ApiKey("Authorization").Description("OAuth2 JWT for accessing secure APIs").Name("Authorization").In("header");
-                c.RootUrl(r => 
+                c.RootUrl(r =>
                 {
-                    if (!string.IsNullOrEmpty(Properties.Settings.Default.ExternalUriRoot) && Properties.Settings.Default.EnableExternalUriRoot)
+                    if (!string.IsNullOrEmpty(Properties.Settings.Default.ExternalUriRoot) && Properties.Settings.Default.EnableExternalUri)
                         return Properties.Settings.Default.ExternalUriRoot;
                     else
-                        return r.RequestUri.ToString().Replace(r.RequestUri.LocalPath,"");
+                        return r.RequestUri.ToString().Replace(r.RequestUri.LocalPath, "");
                 });
             })
             .EnableSwaggerUi(u =>
             {
-                u.DocumentTitle("My API");
+                u.DocumentTitle("圖資平台 API");
                 u.EnableApiKeySupport("Authorization", "header");
             });
 
             //Enable JWT Authentication
             config.SuppressDefaultHostAuthentication();
             config.Filters.Add(new HostAuthenticationFilter(OAuthDefaults.AuthenticationType));
-            
+
             app.UseJwtBearerAuthentication(new JwtBearerAuthenticationOptions
             {
                 AuthenticationMode = AuthenticationMode.Active,
@@ -66,7 +66,7 @@ namespace JwtWebApiSelfHost
                     ValidateIssuer = true,
                     ValidateAudience = true,
                     ValidateIssuerSigningKey = true,
-                    ValidIssuer = Properties.Settings.Default.JwtIssuer,   
+                    ValidIssuer = Properties.Settings.Default.JwtIssuer,
                     ValidAudience = Properties.Settings.Default.JwtAudidence,
                     IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Properties.Settings.Default.JwtSecurityKey))
                 }
@@ -76,7 +76,7 @@ namespace JwtWebApiSelfHost
             config.MapHttpAttributeRoutes();
 
             //Validating model format while receving request.
-            config.Filters.Add(new Filter.ModelValidatorFilterAttribute());
+            config.Filters.Add(new Filter.ModelValidatorFilter());
 
             //Injection settings
             var services = new ServiceCollection();
@@ -87,9 +87,10 @@ namespace JwtWebApiSelfHost
                     .Where(t => typeof(IController).IsAssignableFrom(t)
                     || typeof(IHttpController).IsAssignableFrom(t)));
 
-            //Inject customized objects
-            object injectObject = Guid.NewGuid();
-            services.AddSingleton(typeof(object), injectObject);
+            var db = YlGovDbContext.Create();
+            db.Database.CreateIfNotExists();
+
+            services.AddSingleton(typeof(SR14.Database.Provider.GISPlatformProvider), new SR14.Database.Provider.GISPlatformProvider());
 
             var resolver = new DefaultDependencyResolver(services.BuildServiceProvider());
 
@@ -99,10 +100,7 @@ namespace JwtWebApiSelfHost
             //For Web API
             config.DependencyResolver = resolver; //For Web API
 
-            //Start Web API
             app.UseWebApi(config);
-
-            config.Dispose();
         }
     }
 }

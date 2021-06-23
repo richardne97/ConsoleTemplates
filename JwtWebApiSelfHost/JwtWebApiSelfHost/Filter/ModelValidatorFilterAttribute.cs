@@ -15,7 +15,7 @@ namespace JwtWebApiSelfHost.Filter
     /// <summary>
     /// Validate the model given in request body and passed as a parameter in a controller
     /// </summary>
-    public class ModelValidatorFilter : ActionFilterAttribute
+    public class ModelValidatorFilterAttribute : ActionFilterAttribute
     {
         /// <summary>
         /// Get model validation result and response to client
