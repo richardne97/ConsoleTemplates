@@ -6,8 +6,14 @@ using System.Threading.Tasks;
 
 namespace JwtWebApiSelfHost.Model
 {
+    /// <summary>
+    /// Customzied RequestModel
+    /// </summary>
     public class RequestModel
     {
-        public string Message;
+        /// <summary>
+        /// Received Message
+        /// </summary>
+        public string Message { get; set; }
     }
 }

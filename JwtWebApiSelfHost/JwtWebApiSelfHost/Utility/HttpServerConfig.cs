@@ -15,14 +15,32 @@ namespace JwtWebApiSelfHost.Utility
     public class HttpServerConfig
     {
         private readonly int _listenPort = 0;
+        private readonly HttpListenTypes _httpListenType;
+
+        /// <summary>
+        /// Http Listen Types
+        /// </summary>
+        public enum HttpListenTypes 
+        { 
+            /// <summary>
+            /// Http
+            /// </summary>
+            http, 
+            /// <summary>
+            /// Https
+            /// </summary>
+            https 
+        };
 
         /// <summary>
         /// 
         /// </summary>
-        /// <param name="listenPort">Example: http://+:8000/</param>
-        public HttpServerConfig(int listenPort)
+        /// <param name="listenPort"></param>
+        /// <param name="httpListenTypes"></param>
+        public HttpServerConfig(int listenPort, HttpListenTypes httpListenTypes)
         {
             _listenPort = listenPort;
+            _httpListenType = httpListenTypes;
         }
 
         /// <summary>
@@ -39,7 +57,7 @@ namespace JwtWebApiSelfHost.Utility
                     Verb = "runas",
                     CreateNoWindow = false,
                     FileName = "netsh",
-                    Arguments = $"http delete urlacl url=http://+:{_listenPort}/",
+                    Arguments = $"http delete urlacl url={_httpListenType}://+:{_listenPort}/",
                     RedirectStandardOutput = false,
                     UseShellExecute = true
                 }
@@ -71,7 +89,7 @@ namespace JwtWebApiSelfHost.Utility
                     Verb = "runas",
                     CreateNoWindow = false,
                     FileName = "netsh",
-                    Arguments = $"http add urlacl url=http://+:{_listenPort}/ User={user}",
+                    Arguments = $"http add urlacl url={_httpListenType}://+:{_listenPort}/ User={user}",
                     RedirectStandardOutput = false,
                     UseShellExecute = true
                 }
@@ -104,7 +122,7 @@ namespace JwtWebApiSelfHost.Utility
                     {
                         CreateNoWindow = true,
                         FileName = "netsh",
-                        Arguments = $"http show urlacl url=http://+:{_listenPort}/",
+                        Arguments = $"http show urlacl url={_httpListenType}://+:{_listenPort}/",
                         RedirectStandardOutput = true,
                         UseShellExecute = false
                     }
@@ -114,6 +132,7 @@ namespace JwtWebApiSelfHost.Utility
                 ps.Start();
                 while (!ps.StandardOutput.EndOfStream)
                     sb.Append(ps.StandardOutput.ReadToEnd());
+
                 ps.WaitForExit();
                 ps.Dispose();
 

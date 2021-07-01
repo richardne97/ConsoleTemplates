@@ -40,6 +40,25 @@ namespace JwtWebApiSelfHost.Utility
         }
 
         /// <summary>
+        /// 無資料
+        /// </summary>
+        /// <param name="details"></param>
+        /// <returns></returns>
+        public static HttpResponseMessage NoData(string details)
+        {
+            ResultMessage result = new ResultMessage()
+            {
+                Result = "NoData",
+                Details = details
+            };
+
+            return new HttpResponseMessage(HttpStatusCode.OK)
+            {
+                Content = new JsonContent(JsonConvert.SerializeObject(result, Formatting.Indented), Encoding.UTF8)
+            };
+        }
+
+        /// <summary>
         /// 回應參數不合法
         /// </summary>
         public static HttpResponseMessage InvalidParameters(string details)
@@ -54,6 +73,34 @@ namespace JwtWebApiSelfHost.Utility
             {
                 Content = new JsonContent(JsonConvert.SerializeObject(result, Formatting.Indented), Encoding.UTF8)
             };
+        }
+
+        /// <summary>
+        /// 將物件序列化為JsonContent
+        /// </summary>
+        /// <param name="obj">欲序列化的物件</param>
+        /// <returns></returns>
+        public static HttpResponseMessage ResponseJsonSerializedObject(object obj)
+        {
+            return new HttpResponseMessage(HttpStatusCode.OK)
+            {
+                Content = new JsonContent(JsonConvert.SerializeObject(obj))
+            };
+        }
+
+        /// <summary>
+        /// 回傳檔案或影像
+        /// </summary>
+        /// <param name="bytes">內容</param>
+        /// <returns></returns>
+        public static HttpResponseMessage ResponseByteArray(byte[] bytes)
+        {
+            var message = new HttpResponseMessage(HttpStatusCode.OK)
+            {
+                Content = new ByteArrayContent(bytes)
+            };
+            message.Content.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue("application/octet-stream");
+            return message;
         }
     }
 

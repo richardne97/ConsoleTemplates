@@ -7,11 +7,9 @@ using Microsoft.Owin.Security.OAuth;
 using Owin;
 using Swashbuckle.Application;
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Text;
-using System.Threading.Tasks;
 using System.Web.Http;
 using System.Web.Http.Controllers;
 using System.Web.Mvc;
@@ -31,6 +29,8 @@ namespace JwtWebApiSelfHost
         {
             // Configure Web API for self-host. 
             HttpConfiguration config = new HttpConfiguration();
+
+            #region Swagger 
 
             // Configure Swagger help page
             // 設定 Swagger Help 頁面
@@ -54,7 +54,10 @@ namespace JwtWebApiSelfHost
                 u.EnableApiKeySupport("Authorization", "header");
             });
 
-            //Enable JWT Authentication
+            #endregion
+
+            #region JWT Authentication
+
             config.SuppressDefaultHostAuthentication();
             config.Filters.Add(new HostAuthenticationFilter(OAuthDefaults.AuthenticationType));
             
@@ -67,31 +70,34 @@ namespace JwtWebApiSelfHost
                     ValidateAudience = true,
                     ValidateIssuerSigningKey = true,
                     ValidIssuer = Properties.Settings.Default.JwtIssuer,   
-                    ValidAudience = Properties.Settings.Default.JwtAudidence,
+                    ValidAudience = Properties.Settings.Default.JwtAudience,
                     IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Properties.Settings.Default.JwtSecurityKey))
                 }
             });
 
-            //Enable Attribute Route
-            config.MapHttpAttributeRoutes();
+            #endregion
 
-            //Validating model format while receving request.
-            config.Filters.Add(new Filter.ModelValidatorFilterAttribute());
-
-            //Injection settings
+            #region Injection
             var services = new ServiceCollection();
 
             //Injection setting for controllers. 
             services.AddControllersAsServices(typeof(Startup).Assembly.GetExportedTypes()
                     .Where(t => !t.IsAbstract && !t.IsGenericTypeDefinition)
-                    .Where(t => typeof(IController).IsAssignableFrom(t)
-                    || typeof(IHttpController).IsAssignableFrom(t)));
+                    .Where(t => typeof(IController).IsAssignableFrom(t) || typeof(IHttpController).IsAssignableFrom(t)));
 
-            //Inject customized objects
+            //Inject customized objects (Add your code here)
             object injectObject = Guid.NewGuid();
             services.AddSingleton(typeof(object), injectObject);
+            #endregion
 
-            var resolver = new DefaultDependencyResolver(services.BuildServiceProvider());
+            //Enable Attribute Route
+            config.MapHttpAttributeRoutes();
+
+            //Validating model format while receving request.
+            //驗證接收參數並且回應適當錯誤訊息
+            config.Filters.Add(new Filter.ModelValidatorFilterAttribute());
+
+            DefaultDependencyResolver resolver = new DefaultDependencyResolver(services.BuildServiceProvider());
 
             //For MVC
             DependencyResolver.SetResolver(resolver);

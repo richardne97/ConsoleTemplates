@@ -5,7 +5,7 @@
     <Setting Name="JwtIssuer" Type="System.String" Scope="User">
       <Value Profile="(Default)">Richad.idv</Value>
     </Setting>
-    <Setting Name="JwtAudidence" Type="System.String" Scope="User">
+    <Setting Name="JwtAudience" Type="System.String" Scope="User">
       <Value Profile="(Default)">Cathy.idv</Value>
     </Setting>
     <Setting Name="JwtSecurityKey" Type="System.String" Scope="User">

@@ -1,33 +1,24 @@
 ﻿using JwtWebApiSelfHost.Utility;
 using Microsoft.Owin.Hosting;
 using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
 using System.IO;
 
 namespace JwtWebApiSelfHost
 {
     class Program
     {
-        static void Main(string[] args)
+        static void Main()
         {
-            if (Properties.Settings.Default.UnhandledExceptionReboot)
-                AppDomain.CurrentDomain.UnhandledException += CurrentDomain_UnhandledException;
-
-            #region Redirect Trace messages to NLogTraceListen
-            NLogTraceListener nLogTraceListener = new NLogTraceListener(true);
-            Trace.Listeners.Add(nLogTraceListener);
-            Trace.AutoFlush = true;
-            #endregion
-
-            //Display Program name and version while starts
-            //顯示軟體版本
-            AssemblyName assemblyName = Assembly.GetExecutingAssembly().GetName();
-            Trace.WriteLine($"{assemblyName.Name} {assemblyName.Version} Starts");
+            #region Console Interactive setting
+            
+            //Capture unhandled exception
+            AppDomain.CurrentDomain.UnhandledException += (o,e) =>
+            {
+                ConsoleInteractive.LogAndRestartUnHandledException(Properties.Settings.Default.UnhandledExceptionReboot, e);
+            };
 
             //Disable close button in control box.
             //使 Console 視窗關閉功能無法運作
@@ -35,10 +26,24 @@ namespace JwtWebApiSelfHost
             //Disable quick edit
             //使 Console 視窗輸入功能無法運作，避免誤觸導致系統停止運作
             ConsoleInteractive.DisableQuickEdit();
-            
+            #endregion
+
+            #region Redirect Trace messages to NLogTraceListen
+            NLogTraceListener nLogTraceListener = new NLogTraceListener(true);
+            Trace.Listeners.Add(nLogTraceListener);
+            Trace.AutoFlush = true;
+            #endregion
+
+            #region Display start up message
+            //Display Program name and version while starts
+            //顯示軟體版本
+            AssemblyName assemblyName = Assembly.GetExecutingAssembly().GetName();
+            Trace.WriteLine($"{assemblyName.Name} {assemblyName.Version} Starts");
+            #endregion
+
             #region Check http listen configuration and start listen 檢查並啟用 Http Web API 伺服器
 
-            HttpServerConfig hsc = new HttpServerConfig(Properties.Settings.Default.ListenPort);
+            HttpServerConfig hsc = new HttpServerConfig(Properties.Settings.Default.ListenPort, HttpServerConfig.HttpListenTypes.http);
             string webListenUrl = $"http://+:{Properties.Settings.Default.ListenPort}/";
             bool isHttpSysEnabled = hsc.IsEnable;
             
@@ -50,33 +55,46 @@ namespace JwtWebApiSelfHost
                     isHttpSysEnabled = true;
                 }
                 else
-                    throw new Exception("Http listen can not be started.");
+                    throw new UriFormatException("Http listen can not be started.");
             }
 
             if (isHttpSysEnabled)
             {
-                WebApp.Start<Startup>(webListenUrl);
+                var startOptions = new StartOptions();
+                startOptions.Urls.Add(webListenUrl);
+                //startOptions.Urls.Add("https://+:443");  //Enable Https
+
+                //Can not listem mutiple urls
+                WebApp.Start<Startup>(startOptions);
+                Trace.Listeners.Remove("HostingTraceListener");
                 Trace.WriteLine($"Listen {webListenUrl}");
             }
 
             #endregion
 
-            //Accept user console input and response
-            string cmd = string.Empty;
+            #region Handle Console interactive command 
+
             string helpContent = File.ReadAllText($"{AppContext.BaseDirectory}helpContent.txt");
             
             while (true)
             {
                 Console.Write("\r\n>");
+                
+                string cmd = Console.ReadLine();
                 if (string.IsNullOrEmpty(cmd))
+                {
                     Console.Write(helpContent);
-                else if (cmd == "quit")
+                }
+                else if (cmd == "q")
+                {
                     break;
+                }
                 else
                     CommandHandler(cmd);
             }
+            #endregion
 
-            #region Dispose resouces before leave
+            #region Dispose resouces before leave (add your ocde here)
 
 
 
@@ -84,6 +102,14 @@ namespace JwtWebApiSelfHost
             #endregion
         }
 
+        #region Handle console interactive command (add your code here) 
+
+        //Remember to update helpContent.txt file. 
+
+        /// <summary>
+        /// Handle customized command here
+        /// </summary>
+        /// <param name="cmd"></param>
         static void CommandHandler(string cmd)
         {
             if (cmd != null && cmd.Any())
@@ -99,32 +125,6 @@ namespace JwtWebApiSelfHost
             }
         }
 
-        /// <summary>
-        /// Capture global unhandled exception event
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        static void CurrentDomain_UnhandledException(object sender, UnhandledExceptionEventArgs e)
-        {
-            //Write unhandle exception message to Fatal log
-            StringBuilder sb = new StringBuilder();
-            sb.Append("UnhandledException");
-            if (e.ExceptionObject != null)
-            {
-                Type objType = e.ExceptionObject.GetType();
-                sb.Append($"Object: {objType} Type: {objType.Name}\r\n");
-            }
-            sb.Append($"{e.ExceptionObject}\r\n");
-            Trace.Write(sb.ToString(), "Fatal");
-
-            //Restart program
-            using (Process newProcess = new Process())
-            {
-                newProcess.StartInfo = new ProcessStartInfo(Assembly.GetExecutingAssembly().Location);
-                newProcess.Start();
-                //Give code 1, to prevent Windows OS shows "Program stop working" message window and ask user to response.
-                Environment.Exit(1);
-            };
-        }
+        #endregion
     }
 }

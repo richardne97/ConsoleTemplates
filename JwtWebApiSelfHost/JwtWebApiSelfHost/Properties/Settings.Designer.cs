@@ -38,12 +38,12 @@ namespace JwtWebApiSelfHost.Properties {
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("Cathy.idv")]
-        public string JwtAudidence {
+        public string JwtAudience {
             get {
-                return ((string)(this["JwtAudidence"]));
+                return ((string)(this["JwtAudience"]));
             }
             set {
-                this["JwtAudidence"] = value;
+                this["JwtAudience"] = value;
             }
         }
         

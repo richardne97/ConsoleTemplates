@@ -9,6 +9,9 @@ using System.Reflection;
 
 namespace JwtWebApiSelfHost
 {
+    /// <summary>
+    /// Customized trace listener for NLog
+    /// </summary>
     public class NLogTraceListener : TraceListener
     {
         private readonly Logger _logger;
@@ -32,8 +35,9 @@ namespace JwtWebApiSelfHost
         {
             string writeMsg = $"{GetCaller()}:\r\n{message}";
             _logger.Trace(writeMsg);
+
             if (_enableConsoleOutput)
-                System.Console.WriteLine($"\r\n{DateTime.Now:yyyy-MM-ddTHH:mm:ss} {writeMsg}");
+                Console.WriteLine($"\r\n{DateTime.Now:yyyy-MM-ddTHH:mm:ss} {writeMsg}");
         }
 
         /// <summary>
@@ -44,8 +48,9 @@ namespace JwtWebApiSelfHost
         {
             string writeMsg = $"{GetCaller()}:\r\n{message}";
             _logger.Trace(writeMsg);
+
             if (_enableConsoleOutput)
-                System.Console.WriteLine($"\r\n{DateTime.Now:yyyy-MM-ddTHH:mm:ss} {writeMsg}");
+                Console.WriteLine($"\r\n{DateTime.Now:yyyy-MM-ddTHH:mm:ss} {writeMsg}");
         }
 
         /// <summary>
@@ -57,7 +62,8 @@ namespace JwtWebApiSelfHost
         {
             string writeMsg = $"{GetCaller()}:\r\n{message}";
             if (_enableConsoleOutput)
-                System.Console.WriteLine($"\r\n{DateTime.Now:yyyy-MM-ddTHH:mm:ss} {writeMsg}");
+                Console.WriteLine($"\r\n{DateTime.Now:yyyy-MM-ddTHH:mm:ss} {writeMsg}");
+            
             WriteToNLog(writeMsg, category);
         }
 
@@ -70,18 +76,23 @@ namespace JwtWebApiSelfHost
         {
             string writeMsg = $"{GetCaller()}:\r\n{message}";
             if (_enableConsoleOutput)
-                System.Console.WriteLine($"\r\n{DateTime.Now:yyyy/MM/dd HH:mm:ss} {writeMsg}");
+                Console.WriteLine($"\r\n{DateTime.Now:yyyy/MM/dd HH:mm:ss} {writeMsg}");
+            
             WriteToNLog(writeMsg, category);
         }
 
-        private string GetCaller()
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns></returns>
+        private static string GetCaller()
         {
-            StackTrace stackTrace;
             StackFrame target;
             MethodBase mi;
             try
             {
-                stackTrace = new StackTrace(3, true);
+                //取得前三層的 stack 名稱
+                StackTrace stackTrace = new StackTrace(3, true);
                 target = stackTrace.GetFrame(0);
                 if (target == null)
                     return string.Empty;
